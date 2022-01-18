@@ -1,0 +1,80 @@
+- name: Sync android-emulator-container-scripts to hosts
+  copy:
+    src: "android-emulator-container-scripts"
+    dest: "/emulator"
+    mode: 'preserve'
+    group: root
+    owner: root
+
+- name: Install python requirements and accept license
+  ansible.builtin.shell:
+    cmd: |
+      source ./configure.sh
+      emu-docker licenses --accept
+    chdir: /emulator/android-emulator-container-scripts
+    executable: /bin/bash
+
+- name: Download emulator zip file
+  get_url:
+    url: "{{ emulator_download_url }}"
+    dest: /emulator/emulator.zip
+
+- name: Download system image zip file
+  get_url:
+    url: "{{ system_image_download_url }}"
+    dest: /emulator/sys-img.zip
+
+- name: Build Docker image for given emulator and system image and create user for that
+  ansible.builtin.shell:
+    cmd: |
+      source ./configure.sh
+      emu-docker create /emulator/emulator.zip /emulator/sys-img.zip
+      ./create_web_container.sh -p {{ emulator_webview_username }},{{ emulator_webview_password }}
+    chdir: /emulator/android-emulator-container-scripts
+    executable: /bin/bash
+
+- name: Install coturn server
+  apt:
+    pkg:
+    - coturn
+    state: present
+
+- name: Stop coturn service, if running
+  systemd:
+    name: coturn
+    state: stopped
+
+- name: Ensure coturn TURN Server is enabled
+  blockinfile:
+    path: /etc/default/coturn
+    block: |
+      TURNSERVER_ENABLED=1
+
+- name: Ensure coturn TURN Server is enabled
+  blockinfile:
+    path: /etc/default/coturn
+    block: |
+      lt-cred-mech
+      #set your realm name
+      realm={{ coturn_realm }}
+      #coturn username and password
+      user={{ coturn_username }}:{{ coturn_password }}
+      external-ip={{ host_public_ip }}/{{ host_private_ip }}
+
+- name: Start coturn service
+  systemd:
+    name: coturn
+    state: started
+    enabled: yes
+
+- name: Bring it up ;)
+  community.docker.docker_compose:
+    project_src: /emulator/android-emulator-container-scripts
+    state: present
+    recreate: always
+    build: yes
+    files:
+    - js/docker/docker-compose-build.yaml
+    - js/docker/development.yaml
+  environment:
+    SNIPPET: "{\"iceServers\":[{\"urls\":\"turn:{{ host_public_ip }}:3478\",\"username\":\"{{ coturn_username }}\",\"credential\":\"{{ coturn_password }}\"}]}"
