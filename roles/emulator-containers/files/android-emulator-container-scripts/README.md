@@ -1,3 +1,6 @@
+# cloned from original project from google's github
+not using submodules because of some changes in files
+
 # Android Emulator Container Scripts
 
 This is a set of minimal scripts to run the emulator in a container for various
