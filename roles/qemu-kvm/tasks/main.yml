@@ -1,0 +1,20 @@
+- name: Check if host CPU supports virtualization
+  shell: egrep -c '(vmx|svm)' /proc/cpuinfo
+  register: cpu_information
+  failed_when: int(cpu_information.stdout) > 0
+
+- name: Install qemu/kvm packages
+  apt:
+    state: present
+    update_cache: yes
+    pkg:
+    - qemu-kvm
+    - libvirt-daemon-system
+    - libvirt-clients
+    - bridge-utils
+    - cpu-checker
+
+- name: Check if kvm support is present
+  shell: kvm-ok
+  register: kvm_output
+  failed_when: int(kvm_output.rc) != 0

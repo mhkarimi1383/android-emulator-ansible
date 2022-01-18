@@ -1,0 +1,7 @@
+- name: Install required packages
+  hosts: all
+  tags: 
+  - required
+  roles:
+  - {role: requirements,                tags: ["requirements"]}
+  - {role: qemu-kvm,                    tags: ["qemu-kvm"]}

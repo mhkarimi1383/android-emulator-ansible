@@ -1,0 +1,21 @@
+  - name: Install required tools using apt
+    when: ansible_os_family == "Debian"
+    apt:
+      state: present
+      update_cache: yes
+      pkg:
+      - python3
+      - python3-venv
+      - android-sdk
+      - nodejs
+      - npm
+
+  - name: Install docker-ce
+    include_role: 
+      name: geerlingguy.docker
+      public: yes # make sure we can pass variables
+
+  - name: Install docker pip module
+    include_role: 
+      name: geerlingguy.pip
+      public: yes # make sure we can pass variables
