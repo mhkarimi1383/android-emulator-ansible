@@ -1,4 +1,6 @@
 # Android Emulator server ansible role
+![Android Emulator as a Service](banner.jpg)
+
 installing Android Emulator service and related needed things using ansible
 
 it will give you port number 5555 for adb connection
