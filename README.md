@@ -1,5 +1,6 @@
 # Android Emulator server ansible role
 ![Android Emulator as a Service](banner.jpg)
+> if you want details refer to my [blog](https://karimi.dev/posts/android-emulator-as-a-service/)
 
 installing Android Emulator service and related needed things using ansible
 
