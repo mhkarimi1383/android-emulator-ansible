@@ -50,7 +50,7 @@
     block: |
       TURNSERVER_ENABLED=1
 
-- name: Ensure coturn TURN Server is enabled
+- name: Ensure coturn TURN Server is configured
   blockinfile:
     path: /etc/default/coturn
     block: |
